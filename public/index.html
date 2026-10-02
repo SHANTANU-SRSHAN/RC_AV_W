@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Aviation Journey | Registration</title>
+
+    <!-- Google Font -->
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <!-- CSS -->
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+</head>
+
+<body>
+
+<div class="aviation-background">
+    <img src="/images/aviation-bg.png" alt="Aviation background">
+</div>
+    <!-- =====================================
+         MAIN PAGE
+    ====================================== -->
+
+    <main class="page">
+
+        <!-- =====================================
+             MAIN CARD
+        ====================================== -->
+
+        <section class="main-card">
+
+
+            <!-- =================================
+                 HERO SECTION
+            ================================== -->
+
+            <div class="hero">
+
+
+                <!-- LEFT IMAGE -->
+
+                <div class="hero-image">
+
+                    <img
+                        src="images\aviation-hero.jpg"
+                        alt="Commercial airplane on airport runway"
+                    >
+
+                    <!-- Clean transition -->
+                    <div class="hero-image-overlay"></div>
+
+                </div>
+
+
+                <!-- RIGHT CONTENT -->
+
+                <div class="hero-content">
+
+                    <div class="hero-label">
+
+                        <span></span>
+
+                        AVIATION JOURNEY
+
+                    </div>
+
+
+                    <h1>
+
+                        Get Started
+
+                        <strong>
+                            With Us.
+                        </strong>
+
+                    </h1>
+
+
+                    <p>
+
+                        Connect with opportunities,
+                        experiences and a world beyond
+                        boundaries.
+
+                    </p>
+
+
+                    <div class="hero-divider"></div>
+
+
+                    <div class="journey">
+
+                        <i class="fa-solid fa-route"></i>
+
+                        Begin your journey today.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================
+                 FORM AREA
+            ================================== -->
+
+            <div class="form-area">
+
+
+                <!-- FORM HEADER -->
+
+                <div class="form-header">
+
+                    <div class="form-icon">
+
+                        <i class="fa-solid fa-user"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            REGISTRATION PORTAL
+                        </span>
+
+                        <h2>
+                            Personal Information
+                        </h2>
+
+                        <p>
+                            Tell us about yourself
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================
+                     FORM
+                ================================== -->
+
+                <form id="userForm">
+
+
+                    <!-- FULL NAME -->
+
+                    <div class="field">
+
+                        <label>
+
+                            <i class="fa-solid fa-user"></i>
+
+                            Full Name
+
+                            <b>*</b>
+
+                        </label>
+
+
+                        <div class="input-wrapper">
+
+                            <i class="fa-solid fa-user input-icon"></i>
+
+                            <input
+                                type="text"
+                                id="fullName"
+                                name="fullName"
+                                placeholder="Enter your full name"
+                                autocomplete="name"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- EMAIL -->
+
+                    <div class="field">
+
+                        <label>
+
+                            <i class="fa-solid fa-envelope"></i>
+
+                            Email Address
+
+                            <b>*</b>
+
+                        </label>
+
+
+                        <div class="input-wrapper">
+
+                            <i class="fa-solid fa-envelope input-icon"></i>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="you@example.com"
+                                autocomplete="email"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- QUALIFICATION -->
+
+                    <div class="field">
+
+                        <label>
+
+                            <i class="fa-solid fa-graduation-cap"></i>
+
+                            Qualification
+
+                            <b>*</b>
+
+                        </label>
+
+
+                        <div class="input-wrapper">
+
+                            <i class="fa-solid fa-graduation-cap input-icon"></i>
+
+                            <input
+                                type="text"
+                                id="qualification"
+                                name="qualification"
+                                placeholder="e.g. B.Tech, BCA, MBA, 12th"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PHONE -->
+
+                    <div class="field">
+
+                        <label>
+
+                            <i class="fa-solid fa-phone"></i>
+
+                            Phone Number
+
+                            <b>*</b>
+
+                        </label>
+
+
+                        <div class="input-wrapper">
+
+                            <i class="fa-solid fa-phone input-icon"></i>
+
+                            <input
+                                type="tel"
+                                id="phone"
+                                name="phone"
+                                maxlength="10"
+                                inputmode="numeric"
+                                placeholder="XXXXX XXXXX"
+                                autocomplete="tel"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- DOB -->
+
+                    <div class="field">
+
+                        <label>
+
+                            <i class="fa-solid fa-calendar-days"></i>
+
+                            Date of Birth
+
+                            <b>*</b>
+
+                        </label>
+
+
+                        <div class="input-wrapper">
+
+                            <i class="fa-solid fa-calendar-days input-icon"></i>
+
+                            <input
+                                type="date"
+                                id="dob"
+                                name="dob"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- AUTOMATIC AGE -->
+
+                        <div
+                            class="age-box"
+                            id="ageDisplay"
+                        >
+
+                            <i class="fa-solid fa-cake-candles"></i>
+
+                            <span>
+                                Age will be calculated automatically
+                            </span>
+
+                        </div>
+
+
+                        <input
+                            type="hidden"
+                            id="age"
+                            name="age"
+                        >
+
+                    </div>
+
+
+                    <!-- MESSAGE -->
+
+                    <div class="field message-field">
+
+                        <label>
+
+                            <i class="fa-solid fa-message"></i>
+
+                            Message
+
+                        </label>
+
+
+                        <div class="input-wrapper textarea-wrapper">
+
+                            <i class="fa-solid fa-message input-icon"></i>
+
+                            <textarea
+                                id="message"
+                                name="message"
+                                placeholder="Write your message here..."
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SECURITY -->
+
+                    <div class="security-box">
+
+                        <div class="security-icon">
+
+                            <i class="fa-solid fa-shield-halved"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <strong>
+                                Your information is secure
+                            </strong>
+
+                            <p>
+                                Your information will be securely
+                                stored and used only for the intended purpose.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div
+                        id="statusMessage"
+                        class="status"
+                    ></div>
+
+
+                    <!-- SUBMIT -->
+
+                    <button
+                        type="submit"
+                        id="submitButton"
+                        class="submit-button"
+                    >
+
+                        <span>
+
+                            <i class="fa-solid fa-paper-plane"></i>
+
+                            Submit Information
+
+                        </span>
+
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================
+             FOOTER
+        ================================== -->
+
+        <footer>
+
+            <span>
+
+                <i class="fa-solid fa-plane"></i>
+
+                Aviation Journey
+
+            </span>
+
+
+            <span>
+
+                <i class="fa-solid fa-shield-halved"></i>
+
+                Secure Registration
+
+            </span>
+
+        </footer>
+
+    </main>
+
+    <!-- JavaScript -->
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
