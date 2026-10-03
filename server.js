@@ -43,8 +43,8 @@ console.log(
 );
 
 console.log(
-    "GOOGLE SERVICE ACCOUNT FILE:",
-    process.env.GOOGLE_SERVICE_ACCOUNT_FILE
+    "GOOGLE SERVICE ACCOUNT JSON:",
+    process.env.GOOGLE_SERVICE_ACCOUNT_JSON
         || "NOT SET"
 );
 
