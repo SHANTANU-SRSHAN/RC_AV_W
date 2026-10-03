@@ -1,11 +1,25 @@
-# Sensitive info & Keys
-.env
-.env.*
-credentials/
-
-# Heavy dependency folder
+# Dependencies
 node_modules/
 
-# OS/System files
+# Environment variables / secrets
+.env
+.env.local
+.env.development
+.env.production
+
+# Google service account credentials
+credentials/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS files
 .DS_Store
 Thumbs.db
+
+# Editor files
+.vscode/
+.idea/

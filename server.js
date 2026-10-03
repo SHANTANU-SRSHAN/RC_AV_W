@@ -75,20 +75,53 @@ app.use(
 );
 
 
-/* =========================================
+/* =====================================
    GOOGLE AUTHENTICATION
-========================================= */
+===================================== */
 
-const serviceAccount = JSON.parse(
-    process.env.GOOGLE_SERVICE_ACCOUNT_JSON
-);
+let auth;
 
-const auth = new google.auth.GoogleAuth({
-    credentials: serviceAccount,
-    scopes: [
-        "https://www.googleapis.com/auth/spreadsheets"
-    ]
-});
+if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+    try {
+        const serviceAccount = JSON.parse(
+            process.env.GOOGLE_SERVICE_ACCOUNT_JSON
+        );
+
+        auth = new google.auth.GoogleAuth({
+            credentials: serviceAccount,
+            scopes: [
+                "https://www.googleapis.com/auth/spreadsheets"
+            ]
+        });
+
+        console.log("Google authentication: Environment variable");
+
+    } catch (error) {
+        console.error(
+            "Invalid GOOGLE_SERVICE_ACCOUNT_JSON:",
+            error.message
+        );
+
+        process.exit(1);
+    }
+
+} else {
+
+    auth = new google.auth.GoogleAuth({
+        keyFile: path.join(
+            __dirname,
+            "credentials",
+            "service-account.json"
+        ),
+        scopes: [
+            "https://www.googleapis.com/auth/spreadsheets"
+        ]
+    });
+
+    console.log(
+        "Google authentication: Local service-account.json"
+    );
+}
 
 
 /* =========================================
