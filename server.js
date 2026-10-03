@@ -79,20 +79,15 @@ app.use(
    GOOGLE AUTHENTICATION
 ========================================= */
 
-const serviceAccountFile =
-    process.env.GOOGLE_SERVICE_ACCOUNT_FILE;
+const serviceAccount = JSON.parse(
+    process.env.GOOGLE_SERVICE_ACCOUNT_JSON
+);
 
 const auth = new google.auth.GoogleAuth({
-
-    keyFile: path.join(
-        __dirname,
-        serviceAccountFile
-    ),
-
+    credentials: serviceAccount,
     scopes: [
         "https://www.googleapis.com/auth/spreadsheets"
     ]
-
 });
 
 
