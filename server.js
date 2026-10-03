@@ -7,53 +7,11 @@ const { google } = require("googleapis");
 
 const app = express();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
-
-/* =========================================
-   CHECK ENVIRONMENT VARIABLES
-========================================= */
-
-console.log("\n=========================================");
-console.log("       AVIATION JOURNEY SERVER");
-console.log("=========================================");
-
-console.log(
-    "EMAIL USER:",
-    process.env.EMAIL_USER || "NOT SET"
-);
-
-console.log(
-    "EMAIL PASS:",
-    process.env.EMAIL_PASS
-        ? `LOADED (${process.env.EMAIL_PASS.length} characters)`
-        : "NOT LOADED"
-);
-
-console.log(
-    "ADMIN EMAIL:",
-    process.env.ADMIN_EMAIL || "NOT SET"
-);
-
-console.log(
-    "GOOGLE SHEET ID:",
-    process.env.GOOGLE_SHEET_ID
-        ? "LOADED"
-        : "NOT SET"
-);
-
-console.log(
-    "GOOGLE SERVICE ACCOUNT JSON:",
-    process.env.GOOGLE_SERVICE_ACCOUNT_JSON
-        || "NOT SET"
-);
-
-console.log("=========================================\n");
-
-
-/* =========================================
+/* =====================================
    MIDDLEWARE
-========================================= */
+===================================== */
 
 app.use(express.json());
 
@@ -63,10 +21,9 @@ app.use(
     })
 );
 
-
-/* =========================================
+/* =====================================
    STATIC FILES
-========================================= */
+===================================== */
 
 app.use(
     express.static(
@@ -74,81 +31,77 @@ app.use(
     )
 );
 
+/* =====================================
+   GOOGLE SERVICE ACCOUNT
+   Loaded from Environment Variable
+===================================== */
+
+let serviceAccount;
+
+try {
+    if (!process.env.GOOGLE_SERVICE_ACCOUNT_BASE64) {
+        throw new Error(
+            "GOOGLE_SERVICE_ACCOUNT_BASE64 environment variable is missing."
+        );
+    }
+
+    const serviceAccountJson = Buffer
+        .from(
+            process.env.GOOGLE_SERVICE_ACCOUNT_BASE64,
+            "base64"
+        )
+        .toString("utf8");
+
+    serviceAccount = JSON.parse(serviceAccountJson);
+
+    console.log("GOOGLE SERVICE ACCOUNT LOADED");
+
+} catch (error) {
+
+    console.error(
+        "GOOGLE SERVICE ACCOUNT ERROR:",
+        error.message
+    );
+
+}
 
 /* =====================================
    GOOGLE AUTHENTICATION
 ===================================== */
 
-let auth;
+let auth = null;
+let sheets = null;
 
-if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
-    try {
-        const serviceAccount = JSON.parse(
-            process.env.GOOGLE_SERVICE_ACCOUNT_JSON
-        );
-
-        auth = new google.auth.GoogleAuth({
-            credentials: serviceAccount,
-            scopes: [
-                "https://www.googleapis.com/auth/spreadsheets"
-            ]
-        });
-
-        console.log("Google authentication: Environment variable");
-
-    } catch (error) {
-        console.error(
-            "Invalid GOOGLE_SERVICE_ACCOUNT_JSON:",
-            error.message
-        );
-
-        process.exit(1);
-    }
-
-} else {
+if (serviceAccount) {
 
     auth = new google.auth.GoogleAuth({
-        keyFile: path.join(
-            __dirname,
-            "credentials",
-            "service-account.json"
-        ),
+
+        credentials: serviceAccount,
+
         scopes: [
             "https://www.googleapis.com/auth/spreadsheets"
         ]
+
     });
 
-    console.log(
-        "Google authentication: Local service-account.json"
-    );
+    sheets = google.sheets({
+
+        version: "v4",
+
+        auth
+
+    });
+
 }
 
-
-/* =========================================
-   GOOGLE SHEETS
-========================================= */
-
-const sheets = google.sheets({
-
-    version: "v4",
-
-    auth
-
-});
-
-
-/* =========================================
-   GMAIL SMTP TRANSPORTER
-========================================= */
+/* =====================================
+   EMAIL TRANSPORTER
+===================================== */
 
 const transporter =
     nodemailer.createTransport({
 
-        host: "smtp.gmail.com",
-
-        port: 465,
-
-        secure: true,
+        service: "gmail",
 
         auth: {
 
@@ -162,130 +115,82 @@ const transporter =
 
     });
 
+/* =====================================
+   CHECK GMAIL
+===================================== */
 
-/* =========================================
-   VERIFY GMAIL CONNECTION
-========================================= */
+transporter.verify((error) => {
 
-transporter.verify(
+    if (error) {
 
-    function (error, success) {
+        console.error(
+            "GMAIL SMTP ERROR:",
+            error.message
+        );
 
-        if (error) {
+    } else {
 
-            console.error(
-                "\n❌ GMAIL AUTHENTICATION ERROR\n"
-            );
-
-            console.error(error);
-
-            console.log(
-                "\nCheck these values in .env:"
-            );
-
-            console.log(
-                "1. EMAIL_USER"
-            );
-
-            console.log(
-                "2. EMAIL_PASS"
-            );
-
-            console.log(
-                "3. EMAIL_PASS must be Gmail App Password"
-            );
-
-            console.log(
-                "4. App Password must belong to EMAIL_USER\n"
-            );
-
-        } else {
-
-            console.log(
-                "✅ GMAIL SMTP READY\n"
-            );
-
-        }
+        console.log(
+            "GMAIL SMTP READY"
+        );
 
     }
-);
 
+});
 
-/* =========================================
+/* =====================================
    HOME PAGE
-========================================= */
+===================================== */
 
 app.get(
     "/",
-    function (req, res) {
+    (req, res) => {
 
         res.sendFile(
-
             path.join(
                 __dirname,
                 "public",
                 "index.html"
             )
-
         );
 
     }
 );
 
-
-/* =========================================
+/* =====================================
    SUBMIT API
-========================================= */
+===================================== */
 
 app.post(
     "/api/submit",
-    async function (req, res) {
+    async (req, res) => {
 
         try {
-
-            /* =================================
-               GET FORM DATA
-            ================================= */
 
             const {
 
                 fullName,
-
                 email,
-
                 qualification,
-
                 phone,
-
                 dob,
-
                 age,
-
                 message
 
             } = req.body;
 
-
-            /* =================================
+            /* -----------------------------
                VALIDATION
-            ================================= */
+            ------------------------------ */
 
             if (
-
                 !fullName ||
-
                 !email ||
-
                 !qualification ||
-
                 !phone ||
-
                 !dob ||
-
                 age === undefined ||
-
                 age === null
-
             ) {
 
                 return res
@@ -301,33 +206,49 @@ app.post(
 
             }
 
+            /* -----------------------------
+               CHECK GOOGLE CONFIG
+            ------------------------------ */
 
-            /* =================================
-               TIMESTAMP
-            ================================= */
+            if (!sheets) {
 
-            const timestamp =
-
-                new Date().toLocaleString(
-
-                    "en-IN",
-
-                    {
-
-                        timeZone:
-                            "Asia/Kolkata"
-
-                    }
-
+                console.error(
+                    "Google Sheets is not configured."
                 );
 
+                return res
+                    .status(500)
+                    .json({
 
-            /* =================================
-               SAVE DATA TO GOOGLE SHEET
-            ================================= */
+                        success: false,
+
+                        message:
+                            "Google Sheets configuration error."
+
+                    });
+
+            }
+
+            /* -----------------------------
+               TIMESTAMP
+            ------------------------------ */
+
+            const timestamp =
+                new Date()
+                    .toLocaleString(
+                        "en-IN",
+                        {
+                            timeZone:
+                                "Asia/Kolkata"
+                        }
+                    );
+
+            /* -----------------------------
+               SAVE TO GOOGLE SHEET
+            ------------------------------ */
 
             console.log(
-                "\nSaving data to Google Sheet..."
+                "Saving data to Google Sheet..."
             );
 
             await sheets
@@ -336,9 +257,7 @@ app.post(
                 .append({
 
                     spreadsheetId:
-
-                        process.env
-                            .GOOGLE_SHEET_ID,
+                        process.env.GOOGLE_SHEET_ID,
 
                     range:
                         "Sheet1!A:H",
@@ -348,43 +267,30 @@ app.post(
 
                     requestBody: {
 
-                        values: [
+                        values: [[
 
-                            [
+                            timestamp,
+                            fullName,
+                            email,
+                            qualification,
+                            phone,
+                            dob,
+                            age,
+                            message || ""
 
-                                timestamp,
-
-                                fullName,
-
-                                email,
-
-                                qualification,
-
-                                phone,
-
-                                dob,
-
-                                age,
-
-                                message || ""
-
-                            ]
-
-                        ]
+                        ]]
 
                     }
 
                 });
 
-
             console.log(
-                "✅ Data saved to Google Sheet"
+                "Google Sheet saved successfully."
             );
 
-
-            /* =================================
+            /* -----------------------------
                EMAIL CONTENT
-            ================================= */
+            ------------------------------ */
 
             const emailText = `
 
@@ -420,20 +326,18 @@ ${timestamp}
 
 `;
 
-
-            /* =================================
+            /* -----------------------------
                SEND EMAIL
-            ================================= */
+            ------------------------------ */
 
             console.log(
-                "Sending registration email..."
+                "Sending email notification..."
             );
-
 
             await transporter.sendMail({
 
                 from:
-                    `"Aviation Journey" <${process.env.EMAIL_USER}>`,
+                    process.env.EMAIL_USER,
 
                 to:
                     process.env.ADMIN_EMAIL,
@@ -446,15 +350,13 @@ ${timestamp}
 
             });
 
-
             console.log(
-                "✅ Registration email sent"
+                "Email notification sent successfully."
             );
 
-
-            /* =================================
+            /* -----------------------------
                SUCCESS RESPONSE
-            ================================= */
+            ------------------------------ */
 
             return res
                 .status(200)
@@ -469,19 +371,14 @@ ${timestamp}
 
         }
 
-
         catch (error) {
 
             console.error(
-                "\n========================================="
+                "================================="
             );
 
             console.error(
-                "❌ SUBMISSION ERROR"
-            );
-
-            console.error(
-                "========================================="
+                "SUBMISSION ERROR"
             );
 
             console.error(
@@ -489,9 +386,8 @@ ${timestamp}
             );
 
             console.error(
-                "=========================================\n"
+                "================================="
             );
-
 
             return res
                 .status(500)
@@ -509,21 +405,17 @@ ${timestamp}
     }
 );
 
-
-/* =========================================
+/* =====================================
    START SERVER
-========================================= */
+===================================== */
 
 app.listen(
-
     PORT,
-
-    function () {
+    () => {
 
         console.log(
-            `🚀 Server running at http://localhost:${PORT}\n`
+            `Server running at http://localhost:${PORT}`
         );
 
     }
-
 );
