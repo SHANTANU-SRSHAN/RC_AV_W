@@ -10,6 +10,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 /* =====================================
+   SERVER VERSION
+===================================== */
+
+console.log("=================================");
+console.log("AVIATION JOURNEY SERVER");
+console.log("BASE64 GOOGLE AUTH VERSION");
+console.log("=================================");
+
+/* =====================================
    MIDDLEWARE
 ===================================== */
 
@@ -33,40 +42,48 @@ app.use(
 
 /* =====================================
    GOOGLE SERVICE ACCOUNT
-   Loaded from Environment Variable
+   Loaded from Vercel Environment Variable
 ===================================== */
 
-let serviceAccount;
+let serviceAccount = null;
 
 try {
-    if (!process.env.GOOGLE_SERVICE_ACCOUNT_BASE64) {
+    const base64Credentials =
+        process.env.GOOGLE_SERVICE_ACCOUNT_BASE64;
+
+    if (!base64Credentials) {
         throw new Error(
             "GOOGLE_SERVICE_ACCOUNT_BASE64 environment variable is missing."
         );
     }
 
-    const serviceAccountJson = Buffer
-        .from(
-            process.env.GOOGLE_SERVICE_ACCOUNT_BASE64,
-            "base64"
-        )
-        .toString("utf8");
+    // Remove accidental spaces/newlines from pasted Base64
+    const cleanBase64 =
+        base64Credentials.replace(/\s/g, "");
 
-    serviceAccount = JSON.parse(serviceAccountJson);
+    const serviceAccountJson =
+        Buffer
+            .from(cleanBase64, "base64")
+            .toString("utf8");
 
-    console.log("GOOGLE SERVICE ACCOUNT LOADED");
+    serviceAccount =
+        JSON.parse(serviceAccountJson);
+
+    console.log(
+        "✅ GOOGLE SERVICE ACCOUNT LOADED"
+    );
 
 } catch (error) {
 
     console.error(
-        "GOOGLE SERVICE ACCOUNT ERROR:",
+        "❌ GOOGLE SERVICE ACCOUNT ERROR:",
         error.message
     );
 
 }
 
 /* =====================================
-   GOOGLE AUTHENTICATION
+   GOOGLE SHEETS AUTHENTICATION
 ===================================== */
 
 let auth = null;
@@ -74,23 +91,38 @@ let sheets = null;
 
 if (serviceAccount) {
 
-    auth = new google.auth.GoogleAuth({
+    try {
 
-        credentials: serviceAccount,
+        auth = new google.auth.GoogleAuth({
 
-        scopes: [
-            "https://www.googleapis.com/auth/spreadsheets"
-        ]
+            credentials: serviceAccount,
 
-    });
+            scopes: [
+                "https://www.googleapis.com/auth/spreadsheets"
+            ]
 
-    sheets = google.sheets({
+        });
 
-        version: "v4",
+        sheets = google.sheets({
 
-        auth
+            version: "v4",
 
-    });
+            auth
+
+        });
+
+        console.log(
+            "✅ GOOGLE SHEETS CLIENT READY"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "❌ GOOGLE SHEETS AUTH ERROR:",
+            error.message
+        );
+
+    }
 
 }
 
@@ -124,14 +156,14 @@ transporter.verify((error) => {
     if (error) {
 
         console.error(
-            "GMAIL SMTP ERROR:",
+            "❌ GMAIL SMTP ERROR:",
             error.message
         );
 
     } else {
 
         console.log(
-            "GMAIL SMTP READY"
+            "✅ GMAIL SMTP READY"
         );
 
     }
@@ -158,6 +190,33 @@ app.get(
 );
 
 /* =====================================
+   HEALTH CHECK
+===================================== */
+
+app.get(
+    "/api/health",
+    (req, res) => {
+
+        res.status(200).json({
+
+            success: true,
+
+            googleSheets:
+                !!sheets,
+
+            gmail:
+                !!process.env.EMAIL_USER &&
+                !!process.env.EMAIL_PASS,
+
+            version:
+                "BASE64_GOOGLE_AUTH"
+
+        });
+
+    }
+);
+
+/* =====================================
    SUBMIT API
 ===================================== */
 
@@ -166,6 +225,14 @@ app.post(
     async (req, res) => {
 
         try {
+
+            console.log(
+                "================================="
+            );
+
+            console.log(
+                "📩 SUBMIT REQUEST RECEIVED"
+            );
 
             const {
 
@@ -193,6 +260,10 @@ app.post(
                 age === null
             ) {
 
+                console.error(
+                    "❌ FORM VALIDATION FAILED"
+                );
+
                 return res
                     .status(400)
                     .json({
@@ -207,13 +278,13 @@ app.post(
             }
 
             /* -----------------------------
-               CHECK GOOGLE CONFIG
+               CHECK GOOGLE SHEETS
             ------------------------------ */
 
             if (!sheets) {
 
                 console.error(
-                    "Google Sheets is not configured."
+                    "❌ GOOGLE SHEETS IS NOT CONFIGURED"
                 );
 
                 return res
@@ -224,6 +295,29 @@ app.post(
 
                         message:
                             "Google Sheets configuration error."
+
+                    });
+
+            }
+
+            /* -----------------------------
+               CHECK SHEET ID
+            ------------------------------ */
+
+            if (!process.env.GOOGLE_SHEET_ID) {
+
+                console.error(
+                    "❌ GOOGLE_SHEET_ID IS MISSING"
+                );
+
+                return res
+                    .status(500)
+                    .json({
+
+                        success: false,
+
+                        message:
+                            "Google Sheet ID is missing."
 
                     });
 
@@ -285,7 +379,7 @@ app.post(
                 });
 
             console.log(
-                "Google Sheet saved successfully."
+                "✅ GOOGLE SHEET SAVED SUCCESSFULLY"
             );
 
             /* -----------------------------
@@ -351,7 +445,11 @@ ${timestamp}
             });
 
             console.log(
-                "Email notification sent successfully."
+                "✅ EMAIL NOTIFICATION SENT SUCCESSFULLY"
+            );
+
+            console.log(
+                "================================="
             );
 
             /* -----------------------------
@@ -378,7 +476,7 @@ ${timestamp}
             );
 
             console.error(
-                "SUBMISSION ERROR"
+                "❌ SUBMISSION ERROR"
             );
 
             console.error(
@@ -406,16 +504,26 @@ ${timestamp}
 );
 
 /* =====================================
-   START SERVER
+   EXPORT APP FOR VERCEL
 ===================================== */
 
-app.listen(
-    PORT,
-    () => {
+module.exports = app;
 
-        console.log(
-            `Server running at http://localhost:${PORT}`
-        );
+/* =====================================
+   START SERVER LOCALLY
+===================================== */
 
-    }
-);
+if (!process.env.VERCEL) {
+
+    app.listen(
+        PORT,
+        () => {
+
+            console.log(
+                `🚀 Server running at http://localhost:${PORT}`
+            );
+
+        }
+    );
+
+}
