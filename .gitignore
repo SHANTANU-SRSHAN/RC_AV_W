@@ -1,3 +1,11 @@
-node_modules/
+# Sensitive info & Keys
 .env
+.env.*
 credentials/
+
+# Heavy dependency folder
+node_modules/
+
+# OS/System files
+.DS_Store
+Thumbs.db
